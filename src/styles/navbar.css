@@ -1,0 +1,97 @@
+/* src/styles/navbar.css */
+
+
+/* Headers con fondo por página */
+.header-inicio {
+  padding: 2rem 0;
+  min-height: 400px;
+  background-image: url('/img/inicio.png');
+  background-size: cover;
+  background-position: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+.header-simulador {
+  padding: 2rem 0;
+  min-height: 400px;
+  background-image: url('/img/simulador.png');
+  background-size: cover;
+  background-position: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+.header-solicitar {
+  padding: 2rem 0;
+  min-height: 400px;
+  background-image: url('/img/solicitar.png');
+  background-size: cover;
+  background-position: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+/* Contenedor centrado con ancho máximo para que el contenido no sea demasiado ancho en pantallas grandes */
+.encabezado {
+  width: 100%;
+  max-width: 1200px; /* ajusta este valor si quieres más o menos ancho */
+  margin: 0 auto; /* centra horizontalmente */
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+
+/* Logo */
+.logo-contenedor {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.logo-img {
+  width: 250px;
+  height: auto;
+  object-fit: contain;
+}
+
+
+/* Menú */
+.menu {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+.menu a {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 20px;
+  transition: color 0.3s;
+}
+.menu a:hover,
+.menu a.active {
+  color: #000000;
+}
+
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .logo-img {
+    width: 160px;
+  }
+  .menu {
+    gap: 1rem;
+  }
+  .header-inicio, .header-simulador, .header-solicitar {
+    padding: 1rem 0;
+    min-height: 300px;
+  }
+}
