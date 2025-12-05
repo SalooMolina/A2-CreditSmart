@@ -12,7 +12,19 @@
   font-size: 28px;
   font-weight: bold;
   margin-bottom: 25px;
-  color: #070c52; /* Morado oscuro */
+  color: #070c52;
+}
+
+
+/* ====== SUBTÍTULOS (NUEVO) ====== */
+.subtitulo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #17078c;
+  margin-top: 15px;
+  margin-bottom: 8px;
+  border-left: 5px solid #7c3aed;
+  padding-left: 10px;
 }
 
 
@@ -42,8 +54,10 @@
 }
 
 
+/* Inputs, Selects y Textareas unificados */
 .grupo input,
-.grupo select {
+.grupo select,
+.grupo textarea {
   padding: 10px;
   border: 2px solid #c4b5fd;
   border-radius: 8px;
@@ -54,8 +68,17 @@
 }
 
 
+/* ESTILO textarea (NUEVO) */
+.grupo textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+
+/* Focus */
 .grupo input:focus,
-.grupo select:focus {
+.grupo select:focus,
+.grupo textarea:focus {
   border-color: #7c3aed;
   box-shadow: 0 0 5px rgba(124, 58, 237, 0.5);
 }
@@ -103,7 +126,7 @@
 }
 
 
-/* botón enviar solicitud */
+/* Botón enviar solicitud */
 .btn-rosa {
   background: #312fb3;
   padding: 12px 20px;
@@ -118,24 +141,31 @@
 }
 
 
+/* Loading (NUEVO) */
+.btn-rosa:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
 .btn-rosa:hover {
   background: #2e216b;
 }
 
 
-/* ====== RESUMEN (ESTILO MEJORADO) ====== */
+/* ====== RESUMEN ====== */
 .resumen {
   margin-top: 25px;
   padding: 25px;
-  background: #ede9fe; /* Lila suave, armoniza con todo tu diseño */
+  background: #ede9fe;
   border-radius: 15px;
-  border-left: 6px solid #7c3aed; /* Morado principal */
-  box-shadow: 0 4px 12px rgba(76, 29, 149, 0.15); /* Sombrita suave morada */
+  border-left: 6px solid #7c3aed;
+  box-shadow: 0 4px 12px rgba(76, 29, 149, 0.15);
 }
 
 
 .resumen h3 {
-  color: #0e1560; /* Azul/morado oscuro como tus labels */
+  color: #0e1560;
   font-size: 20px;
   margin-bottom: 15px;
   font-weight: 700;
@@ -143,21 +173,18 @@
 
 
 .resumen p {
-  color: #1c1c3d; /* Texto oscuro elegante */
-  background: #f5f3ff; /* Tarjetitas internas muy suaves */
+  color: #1c1c3d;
+  background: #f5f3ff;
   padding: 10px 12px;
   border-radius: 8px;
   margin-bottom: 10px;
-  border: 1px solid #c4b5fd; /* Mismo borde que tus inputs */
+  border: 1px solid #c4b5fd;
 }
 
 
-/* Quitar borde al último pero conservar armonía */
 .resumen p:last-child {
   margin-bottom: 0;
 }
-
-
 
 
 /* ====== ÉXITO ====== */
@@ -173,12 +200,14 @@
   font-size: 17px;
 }
 
+
+/* ====== ERROR GENERAL AL ENVIAR ====== */
 .error-enviar {
-  background: #ffe5e5;       
-  color: #b91c1c;           
+  background: #ffe5e5;
+  color: #b91c1c;
   padding: 14px 18px;
   border-radius: 12px;
-  border-left: 5px solid #ef4444; 
+  border-left: 5px solid #ef4444;
   box-shadow: 0 3px 8px rgba(220, 38, 38, 0.15);
   font-size: 16px;
   font-weight: 600;
@@ -187,3 +216,89 @@
 }
 
 
+/* ====== FILTRO DE CORREO ====== */
+.filtro-correo {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 25px auto;
+  width: 100%;
+  max-width: 500px;
+}
+
+
+.filtro-correo input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #c4b5fd;
+  border-radius: 10px;
+  outline: none;
+  background: white;
+  font-size: 15px;
+  color: #0b0b2e;
+  transition: 0.2s;
+}
+
+
+.filtro-correo input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 5px rgba(124, 58, 237, 0.5);
+}
+
+
+/* Botón Buscar */
+.btn-buscar {
+  padding: 12px 18px;
+  background: #17078c;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+
+.btn-buscar:hover {
+  background: #6b65d7;
+}
+
+
+/* Responsive */
+@media (max-width: 600px) {
+  .filtro-correo {
+    flex-direction: column;
+  }
+
+
+  .btn-buscar {
+    width: 100%;
+  }
+}
+
+
+/* Contenedor del detalle oculto/visible */
+.detalle-solicitud {
+  margin-top: 10px;
+  background: #f8f6ff;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  border-left: 4px solid #a076f9;
+  animation: fadeIn 0.3s ease;
+}
+
+
+/* Animación suave al desplegar */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

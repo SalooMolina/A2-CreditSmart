@@ -1,8 +1,10 @@
 import { NavLink, useLocation } from "react-router-dom";
 import "../styles/navbar.css";
 
+
 function Navbar() {
   const location = useLocation(); //Contiene información de la URL actual.
+
 
   // Dependiendo de la página, se devuelve un CSS diferente para el header (En este caso la imagen)
   const getHeaderClass = () => {
@@ -11,12 +13,14 @@ function Navbar() {
     return "header-inicio";
   };
 
+
   return (
     <header className={getHeaderClass()}> {/*aplica la clase CSS según la ruta actual.*/}
       <div className="encabezado">
         <div className="logo-contenedor">
           <img src="/img/CreditSmart_logo.png" alt="Logo CreditSmart" className="logo-img" />
         </div>
+
 
         <nav>
           <ul className="menu">
@@ -26,15 +30,24 @@ function Navbar() {
               </NavLink>
             </li>
 
+
             <li>
               <NavLink to="/simulator">
                 Simulador Crédito
               </NavLink>
             </li>
 
+
             <li>
               <NavLink to="/request">
                 Solicitar Crédito
+              </NavLink>
+            </li>
+
+
+            <li>
+              <NavLink to="/mis-solicitudes">
+                Mis solicitudes
               </NavLink>
             </li>
           </ul>
@@ -44,4 +57,6 @@ function Navbar() {
   );
 }
 
+
 export default Navbar;
+
