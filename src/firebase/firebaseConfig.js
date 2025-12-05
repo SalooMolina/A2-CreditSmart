@@ -2,20 +2,15 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
-
-// Configuración que te da Firebase en la consola
 const firebaseConfig = {
-  apiKey: "AIzaSyAb6mVe4h9SrJxx4XXefOFMlY3kSLHNUXs",
-  authDomain: "a3-creditsmart.firebaseapp.com",
-  projectId: "a3-creditsmart",
-  storageBucket: "a3-creditsmart.firebasestorage.app",
-  messagingSenderId: "859299357716",
-  appId: "1:859299357716:web:9fba1cc5382034bd26b301"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
-
-// Exportar la base de datos
 export const db = getFirestore(app);
