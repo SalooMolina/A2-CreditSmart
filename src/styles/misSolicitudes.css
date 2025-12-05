@@ -1,0 +1,174 @@
+/* ====== CONTENEDOR GENERAL ====== */
+.mis-solicitudes-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+/* ====== LISTA DE SOLICITUDES ====== */
+.lista-solicitudes {
+  list-style: none;
+  padding: 0;
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.item-solicitud {
+  background: #f9f9ff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(76, 29, 149, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 5px solid #7c3aed;
+}
+
+.item-solicitud strong {
+  font-size: 18px;
+  color: #17078c;
+}
+
+.item-solicitud span {
+  font-size: 15px;
+  color: #1c1c3d;
+}
+
+.fecha-solicitud {
+  font-size: 14px;
+  color: #555;
+  margin-top: 4px;
+}
+
+/* ====== BOTÓN VER MÁS ====== */
+.btn-ver-mas {
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: #17078c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  align-self: flex-start;
+  transition: 0.2s;
+}
+
+.btn-ver-mas:hover {
+  background: #6b65d7;
+}
+
+/* ====== MENSAJES ====== */
+.mensaje-cargando,
+.mensaje-error,
+.mensaje-vacio {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.mensaje-cargando {
+  color: #17078c;
+}
+
+.mensaje-error {
+  background: #ffe5e5;
+  color: #b91c1c;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 5px solid #ef4444;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.15);
+}
+
+.mensaje-vacio {
+  color: #555;
+}
+
+/* ====== DETALLE DESPLEGABLE ====== */
+.detalle-solicitud {
+  margin-top: 12px;
+  background: #f5f3ff;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  border-left: 4px solid #a076f9;
+  animation: fadeIn 0.3s ease;
+}
+
+.detalle-solicitud p {
+  margin: 6px 0;
+  color: #0b0b2e;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ====== BOTONES DE NAVEGACIÓN ====== */
+.botones-navegacion {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.btn-morado,
+.btn-rosa {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  color: white;              
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease; 
+  text-decoration: none;
+  text-align: center;
+}
+
+/* Botón morado */
+.btn-morado {
+  background: #17078c;
+}
+
+.btn-morado:hover {
+  background: #7c77d3;
+  color: white;             
+}
+
+
+.btn-rosa {
+  background: #706fc2;
+}
+
+.btn-rosa:hover {
+  background: #2e216b;
+  color: white;              
+}
+/* ====== RESPONSIVE ====== */
+@media (max-width: 600px) {
+  .lista-solicitudes {
+    gap: 12px;
+  }
+
+  .botones-navegacion {
+    flex-direction: column;
+  }
+
+  .btn-morado,
+  .btn-rosa {
+    width: 100%;
+  }
+}

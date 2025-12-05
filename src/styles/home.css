@@ -1,0 +1,16 @@
+/* Mensaje de carga */
+.loading-message {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #4a148c; /* morado consistente */
+  margin-top: 2rem;
+  animation: pulse 1.5s infinite;
+}
+
+/* Animación suave */
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
