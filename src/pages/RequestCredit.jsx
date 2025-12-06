@@ -1,12 +1,13 @@
 // Importaciones
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Hero from "../components/Hero";
 import "../styles/solicitar.css";
 
-// Servicio de Firebase
+// Firebase
 import { createRequest } from "../firebase/requests.service";
+import { getProducts } from "../firebase/products.service";
 
 const RequestCredit = () => {
   // Datos personales
@@ -19,14 +20,14 @@ const RequestCredit = () => {
   const [tipoCredito, setTipoCredito] = useState("");
   const [monto, setMonto] = useState("");
   const [plazo, setPlazo] = useState("");
-  const [destino, setDestino] = useState(""); // <-- NUEVO
+  const [destino, setDestino] = useState("");
 
   // Datos laborales
-  const [empresa, setEmpresa] = useState(""); // <-- NUEVO
-  const [cargo, setCargo] = useState(""); // <-- NUEVO
-  const [ingresos, setIngresos] = useState(""); // <-- NUEVO
+  const [empresa, setEmpresa] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [ingresos, setIngresos] = useState("");
 
-  // Control y validaciones
+  // Control
   const [errors, setErrors] = useState({});
   const [cuota, setCuota] = useState(null);
   const [resumenVisible, setResumenVisible] = useState(false);
@@ -34,9 +35,29 @@ const RequestCredit = () => {
   const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [creditos, setCreditos] = useState([]);
+  const [creditoSeleccionado, setCreditoSeleccionado] = useState(null);
+
   const navigate = useNavigate();
 
-  // Validaciones simples
+  // -----------------------------
+  // CARGAR CRÉDITOS DESDE FIREBASE
+  // -----------------------------
+  useEffect(() => {
+    const fetchCredits = async () => {
+      try {
+        const data = await getProducts();
+        setCreditos(data);
+      } catch (error) {
+        console.error("Error al cargar créditos:", error);
+      }
+    };
+    fetchCredits();
+  }, []);
+
+  // -----------------------------
+  // VALIDACIONES
+  // -----------------------------
   const validate = (field, value) => {
     let newErrors = { ...errors };
 
@@ -59,38 +80,48 @@ const RequestCredit = () => {
     setErrors(newErrors);
   };
 
-  // Validación final
   const validateAll = () => {
     let newErrors = {};
-
     if (nombre.trim().length < 3) newErrors.nombre = "El nombre es inválido.";
     if (!/^\d{6,10}$/.test(cedula)) newErrors.cedula = "Cédula inválida.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) newErrors.correo = "Correo inválido.";
     if (!/^\d{10}$/.test(telefono)) newErrors.telefono = "Teléfono inválido.";
-
     setErrors(newErrors);
     return newErrors;
   };
 
-  // Cálculo de cuota
-  const calcularCuota = (monto, plazo) => {
-    if (!monto || !plazo) return null;
-    const tasaMensual = 0.015;
-    const p = parseFloat(monto);
-    const n = parseInt(plazo);
-    const cuotaCalc = (p * tasaMensual) / (1 - Math.pow(1 + tasaMensual, -n));
-    return cuotaCalc.toFixed(2);
+  // -----------------------------
+  // CALCULAR CUOTA
+  // -----------------------------
+  const calcularCuota = (monto, plazo, credito) => {
+    if (!monto || !plazo || !credito) return null;
+
+    const tasaAnual = credito.tasa / 100;
+    const tasaMensual = tasaAnual / 12;
+
+    const P = Number(monto);
+    const n = Number(plazo);
+    const i = tasaMensual;
+
+    const cuota = P * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+    return cuota.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   const handleMontoPlazoChange = (field, value) => {
     if (field === "monto") setMonto(value);
     if (field === "plazo") setPlazo(value);
+
     const updatedMonto = field === "monto" ? value : monto;
     const updatedPlazo = field === "plazo" ? value : plazo;
-    setCuota(calcularCuota(updatedMonto, updatedPlazo));
+
+    if (creditoSeleccionado) {
+      setCuota(calcularCuota(updatedMonto, updatedPlazo, creditoSeleccionado));
+    }
   };
 
-  // Mostrar resumen
+  // -----------------------------
+  // RESUMEN
+  // -----------------------------
   const handleResumen = () => {
     const validationErrors = validateAll();
 
@@ -112,7 +143,9 @@ const RequestCredit = () => {
     setResumenVisible(true);
   };
 
-  // Enviar a Firestore
+  // -----------------------------
+  // ENVIAR SOLICITUD
+  // -----------------------------
   const enviarSolicitud = async () => {
     const nuevaSolicitud = {
       nombre,
@@ -123,10 +156,10 @@ const RequestCredit = () => {
       monto,
       plazo,
       cuota,
-      destino,   // <-- NUEVO
-      empresa,   // <-- NUEVO
-      cargo,     // <-- NUEVO
-      ingresos,  // <-- NUEVO
+      destino,
+      empresa,
+      cargo,
+      ingresos,
       fecha: new Date().toISOString()
     };
 
@@ -134,13 +167,12 @@ const RequestCredit = () => {
       setLoading(true);
       await createRequest(nuevaSolicitud);
 
-      //Guarda el correo del usuario en localStorage
-  localStorage.setItem("correoUsuario", correo);
+      localStorage.setItem("correoUsuario", correo);
 
       setSuccess(true);
       setResumenVisible(false);
 
-      // Resetear form
+      // Reset
       setNombre("");
       setCedula("");
       setCorreo("");
@@ -153,8 +185,8 @@ const RequestCredit = () => {
       setCargo("");
       setIngresos("");
       setCuota(null);
+      setCreditoSeleccionado(null);
 
-      //Esto acá es para que una vez enviado navegue a otra ruta (Si lo vamos a implementar)
       navigate("/mis-solicitudes");
 
     } catch (err) {
@@ -168,17 +200,14 @@ const RequestCredit = () => {
     <>
       <Hero
         titulo="Solicitar Crédito"
-        parrafos={[
-          "Completa el formulario con tus datos personales, laborales y detalles del crédito que deseas solicitar.",
-        ]}
+        parrafos={["Completa el formulario con tus datos personales, laborales y detalles del crédito que deseas solicitar."]}
       />
 
       <div className="solicitar-container">
         <h2 className="titulo-formulario">Formulario de Solicitud</h2>
 
         <form className="formulario">
-
-          {/* --- DATOS PERSONALES --- */}
+          {/* DATOS PERSONALES */}
           <h3 className="subtitulo">Datos Personales</h3>
 
           <div className="grupo">
@@ -225,19 +254,25 @@ const RequestCredit = () => {
             {errors.telefono && <span className="error">{errors.telefono}</span>}
           </div>
 
-          {/* --- DATOS DEL CRÉDITO --- */}
+          {/* DATOS DEL CRÉDITO */}
           <h3 className="subtitulo">Datos del Crédito</h3>
 
           <div className="grupo">
             <label>Tipo de Crédito</label>
-            <select value={tipoCredito} onChange={(e) => setTipoCredito(e.target.value)}>
+            <select
+              value={tipoCredito}
+              onChange={(e) => {
+                const tipo = e.target.value;
+                setTipoCredito(tipo);
+                const credito = creditos.find(c => c.nombre === tipo);
+                setCreditoSeleccionado(credito || null);
+                setCuota(calcularCuota(monto, plazo, credito));
+              }}
+            >
               <option value="">Seleccione una opción</option>
-              <option value="Libre Inversión">Libre Inversión</option>
-              <option value="Vehicular">Vehicular</option>
-              <option value="Vivienda">Vivienda</option>
-              <option value="Educativo">Educativo</option>
-              <option value="Agropecuario">Agropecuario</option>
-              <option value="Empresarial">Empresarial</option>
+              {creditos.map(c => (
+                <option key={c.id} value={c.nombre}>{c.nombre}</option>
+              ))}
             </select>
           </div>
 
@@ -246,23 +281,22 @@ const RequestCredit = () => {
             <input
               type="number"
               value={monto}
-              min="500000"
+              min={creditoSeleccionado?.minAmount || 0}
+              max={creditoSeleccionado?.maxAmount || undefined}
               onChange={(e) => handleMontoPlazoChange("monto", e.target.value)}
             />
           </div>
 
           <div className="grupo">
             <label>Plazo (meses)</label>
-            <select
+            <input
+              type="number"
               value={plazo}
+              min="1"
+              max={creditoSeleccionado?.plazoMax || undefined}
               onChange={(e) => handleMontoPlazoChange("plazo", e.target.value)}
-            >
-              <option value="">Seleccione</option>
-              <option value="6">6 meses</option>
-              <option value="12">12 meses</option>
-              <option value="18">18 meses</option>
-              <option value="24">24 meses</option>
-            </select>
+              placeholder={creditoSeleccionado ? `Hasta ${creditoSeleccionado.plazo} meses` : ""}
+            />
           </div>
 
           <div className="grupo">
@@ -271,7 +305,7 @@ const RequestCredit = () => {
               value={destino}
               onChange={(e) => setDestino(e.target.value)}
               placeholder="Ejemplo: compra de vehículo, remodelación, estudios..."
-            ></textarea>
+            />
           </div>
 
           {cuota && (
@@ -280,37 +314,24 @@ const RequestCredit = () => {
             </p>
           )}
 
-          {/* --- DATOS LABORALES --- */}
+          {/* DATOS LABORALES */}
           <h3 className="subtitulo">Datos Laborales</h3>
 
           <div className="grupo">
             <label>Empresa donde trabaja</label>
-            <input
-              type="text"
-              value={empresa}
-              onChange={(e) => setEmpresa(e.target.value)}
-            />
+            <input type="text" value={empresa} onChange={(e) => setEmpresa(e.target.value)} />
           </div>
 
           <div className="grupo">
             <label>Cargo</label>
-            <input
-              type="text"
-              value={cargo}
-              onChange={(e) => setCargo(e.target.value)}
-            />
+            <input type="text" value={cargo} onChange={(e) => setCargo(e.target.value)} />
           </div>
 
           <div className="grupo">
             <label>Ingresos mensuales</label>
-            <input
-              type="number"
-              value={ingresos}
-              onChange={(e) => setIngresos(e.target.value)}
-            />
+            <input type="number" value={ingresos} onChange={(e) => setIngresos(e.target.value)} />
           </div>
 
-          {/* BOTÓN RESUMEN */}
           <button type="button" className="btn-morado" onClick={handleResumen}>
             Ver Resumen
           </button>
@@ -318,7 +339,7 @@ const RequestCredit = () => {
           {formError && <p className="error-enviar">{formError}</p>}
         </form>
 
-        {/* --- RESUMEN --- */}
+        {/* RESUMEN */}
         {resumenVisible && (
           <div className="resumen">
             <h3>Resumen de la solicitud</h3>
@@ -329,14 +350,14 @@ const RequestCredit = () => {
             <p><strong>Teléfono:</strong> {telefono}</p>
 
             <p><strong>Tipo crédito:</strong> {tipoCredito}</p>
-            <p><strong>Monto:</strong> ${monto}</p>
+            <p><strong>Monto:</strong> ${Number(monto).toLocaleString("es-CO")}</p>
             <p><strong>Plazo:</strong> {plazo} meses</p>
             <p><strong>Destino:</strong> {destino}</p>
             <p><strong>Cuota mensual:</strong> ${cuota}</p>
 
             <p><strong>Empresa:</strong> {empresa}</p>
             <p><strong>Cargo:</strong> {cargo}</p>
-            <p><strong>Ingresos:</strong> ${ingresos}</p>
+            <p><strong>Ingresos:</strong> ${Number(ingresos).toLocaleString("es-CO")}</p>
 
             <button className="btn-rosa" onClick={enviarSolicitud} disabled={loading}>
               {loading ? "Enviando..." : "Enviar Solicitud"}

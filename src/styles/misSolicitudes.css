@@ -172,3 +172,86 @@
     width: 100%;
   }
 }
+
+/* ---------- FONDO OSCURO ---------- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;     /* espacio en móviles */
+  z-index: 1000;
+}
+
+/* ---------- CONTENEDOR DEL MODAL ---------- */
+.modal-container {
+  background: #fff;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;     /* límite visual del modal */
+  overflow-y: auto;     /* scroll interno */
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+/* Título del modal */
+.modal-container h3 {
+  margin-bottom: 15px;
+  color: rgb(23, 29, 119);
+}
+
+/* ---------- INPUTS ---------- */
+.modal-container .grupo {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.modal-container label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.modal-container input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* ---------- BOTONES ---------- */
+.modal-container button {
+  margin-top: 10px;
+}
+
+/* Botones dentro del modal (editar/eliminar) */
+.acciones {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-editar {
+  background: #4b7bec;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-eliminar {
+  background: #eb3b5a;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+

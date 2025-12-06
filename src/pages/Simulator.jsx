@@ -1,193 +1,144 @@
-//Importaciones
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Hero from "../components/Hero";
 import Footer from "../components/Footer";
-import CreditCard from "../components/CreditCard";
-import creditsData from "../data/creditsData";
+import { getProducts } from "../firebase/products.service";
 import "../styles/simulador.css";
 
 function Simulador() {
-  //Estados
-  const [nombreSeleccionado, setNombreSeleccionado] = useState(""); //Guarda el nombre del crédito que el usuario elige en el select
-  const [montoMin, setMontoMin] = useState(0); //Guarda el monto mínimo que el usuario escoge
-  const [montoMax, setMontoMax] = useState(999999999); //Guarda el monto máximo elegido
-  const [tasaOrden, setTasaOrden] = useState(""); //Guarda cómo quiere ordenar el usuario:
+  const [tipoCredito, setTipoCredito] = useState("");
+  const [monto, setMonto] = useState("");
+  const [meses, setMeses] = useState("");
+  const [resultado, setResultado] = useState(null);
+  const [creditos, setCreditos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Select de nombres
-  const nombresDisponibles = useMemo(
-    () => Array.from(new Set(creditsData.map((c) => c.nombre))), //Saca todos los nombres
-    []
-  );
-
-  // Select de montos disponibles
-  //Recorre los créditos, extrae los min y max, y los ordena de menor a mayor
-  const montosDisponibles = useMemo(() => {
-    const valores = []; //Crea el arreglo de valores, para guardar los montos
-    creditsData.forEach((c) => {//Recorre todos los créditos dentro de credisData
-      valores.push(c.minAmount); //Cada crédito se llama c (Guarda los min)
-      valores.push(c.maxAmount); //Guarda los max
-    });
-
-    return Array.from(new Set(valores)).sort((a, b) => a - b); //Orena los números de menor a mayor
+  // Cargar créditos desde Firebase
+  useEffect(() => {
+    const fetchCredits = async () => {
+      try {
+        const data = await getProducts();
+        setCreditos(data);
+      } catch (error) {
+        console.error("Error al cargar créditos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCredits();
   }, []);
 
-  // ---- FILTRADO ----
-  const filtrarCreditos = () => {
-    let resultados = [...creditsData]; //Crea una copia del array, para no cambiar los datos originales
+  // Lista de tipos de crédito (para el select)
+  const tiposDisponibles = useMemo(
+    () => Array.from(new Set(creditos.map((c) => c.nombre))),
+    [creditos]
+  );
 
-    // Filtrar por nombre
-    //Revisa si el usuario seleccionó un nombre de crédito
-    //toma la copia de todos los créditos y solo deja los que tienen el mismo nombre que eligió el usuario.
-    if (nombreSeleccionado) {
-      resultados = resultados.filter(
-        (c) => c.nombre === nombreSeleccionado
-      );
+  const calcularCuota = (e) => {
+    e.preventDefault();
+
+    if (!tipoCredito || !monto || !meses) {
+      alert("Por favor completa todos los campos");
+      return;
     }
 
-    // Filtrar por rango: se revisa si el rango seleccionado se cruza con el rango del crédito
-    resultados = resultados.filter(
-      (c) => c.maxAmount >= montoMin && c.minAmount <= montoMax
-    );
+    const credito = creditos.find((c) => c.nombre === tipoCredito);
 
-    // Ordenar por tasa
-    if (tasaOrden === "asc") {
-      resultados.sort((a, b) => a.tasa - b.tasa);
+    if (!credito) {
+      alert("Crédito no encontrado.");
+      return;
     }
 
-    return resultados;
+    // TASA ANUAL → TASA MENSUAL
+    const tasaAnual = credito.tasa / 100;
+    const tasaMensual = tasaAnual / 12;
+
+    const P = Number(monto);
+    const n = Number(meses);
+    const i = tasaMensual;
+
+    const cuota = P * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+    const totalPagar = cuota * n;
+    const interesesTotales = totalPagar - P;
+
+    setResultado({
+      cuota: cuota.toFixed(2),
+      totalPagar: totalPagar.toFixed(2),
+      interesesTotales: interesesTotales.toFixed(2),
+      tasa: credito.tasa, // anual
+    });
   };
 
-  const resultados = filtrarCreditos(); //Llama la función
-
-  // ---- LIMPIAR FILTROS ----
-  // Restablece los filtros a sus valores iniciales
-  const limpiarFiltros = () => {
-    setNombreSeleccionado("");
-    setMontoMin(0);
-    setMontoMax(999999999);
-    setTasaOrden("");
-  };
+  if (loading) return <p>Cargando créditos...</p>;
 
   return (
     <div>
       <Hero
         titulo="Simulador de Créditos"
         parrafos={[
-          "Encuentra el crédito perfecto para ti de manera rápida y sencilla.",
-          "Utiliza nuestro buscador y filtros para comparar tasas, montos y plazos.",
+          "Simula tu crédito y descubre cuánto pagarías al mes.",
+          "Selecciona un tipo de crédito, el monto y el plazo.",
         ]}
       />
 
-      {/* CONTENEDOR DE FILTROS */}
-      <section className="simulador-filtros">
-        <h3>Buscar Créditos</h3>
+      {/* FORM */}
+      <section className="simulador-section">
+        <h2>Simular crédito</h2>
 
-        <div className="filtros-grid">
+        <form onSubmit={calcularCuota}>
+          <div className="simulacion-grid">
+            <div className="input-group">
+              <label>Tipo de crédito</label>
+              <select
+                value={tipoCredito}
+                onChange={(e) => setTipoCredito(e.target.value)}
+              >
+                <option value="">Seleccione</option>
+                {tiposDisponibles.map((t, i) => (
+                  <option key={i} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Buscar por nombre */}
-          <div className="filtro">
-            <label htmlFor="nombre">Buscar por nombre</label> {/*Conecta esta etiqueta con el <select> que tiene */}
-            <select
-              id="nombre"
-              value={nombreSeleccionado} //Está ligado al estado nombreSelccionado
-              onChange={(e) => setNombreSeleccionado(e.target.value)} //Cada vez que se selecciona algo diferente, se actualiza el estado
-            >
-              <option value="">Seleccione una opción</option>
-              
-              {/* se recorre el array y según la opción elegida, este se muestra en el option */}
-              {nombresDisponibles.map((n, i) => ( //i → representa el índice de ese elemento (0, 1, 2…).
-                <option key={i} value={n}>{n}</option> //n → representa el elemento actual del array (es decir, el nombre del crédito).
-              ))}
-            </select>
+            <div className="input-group">
+              <label>Monto solicitado</label>
+              <input
+                type="number"
+                min="0"
+                value={monto}
+                onChange={(e) => setMonto(e.target.value)}
+                placeholder="Ej: 50000000"
+              />
+            </div>
+
+            <div className="input-group">
+              <label>Plazo (meses)</label>
+              <input
+                type="number"
+                min="1"
+                value={meses}
+                onChange={(e) => setMeses(e.target.value)}
+                placeholder="Ej: 12"
+              />
+            </div>
           </div>
 
-          {/* Monto mínimo */}
-          <div className="filtro">
-            <label htmlFor="montoMin">Monto mínimo</label> {/*Conecta el texto "Monto mínimo" con el <select id="montoMin"> */}
-            <select
-              id="montoMin"
-              value={montoMin}
-              onChange={(e) => setMontoMin(Number(e.target.value))} //cada vez que el usuario elige un monto, se guarda en el estado como número
-            >
-              <option value={0}>No mínimo</option>
-              {montosDisponibles.map((m, i) => ( //Misma lógica que con nombres preo aplicada a monto
-                <option key={i} value={m}>
-                  ${m.toLocaleString()}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Monto máximo */}
-          <div className="filtro">
-            <label htmlFor="montoMax">Monto máximo</label>
-            <select
-              id="montoMax"
-              value={montoMax}
-              onChange={(e) => setMontoMax(Number(e.target.value))}
-            >
-              <option value={999999999}>No máximo</option>
-              {montosDisponibles.map((m, i) => (
-                <option key={i} value={m}>
-                  ${m.toLocaleString()}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Orden por tasa */}
-          <div className="filtro">
-            <label htmlFor="tasaOrden">Ordenar por tasa</label>
-            <select
-              id="tasaOrden"
-              value={tasaOrden} //el valor actual del select está controlado por el estado tasaOrden.
-              onChange={(e) => setTasaOrden(e.target.value)} //cuando el usuario elige una opción, se guarda en el estado tasaOrden.
-            >
-              <option value="">Seleccione una opción</option>
-              <option value="asc">Menor a mayor</option>
-            </select>
-          </div>
-
-          {/* Botón limpiar */}
-          <div className="boton-filtros">
-            <button
-              type="button"
-              onClick={limpiarFiltros} //cuando el usuario hace clic, se ejecuta la función limpiarFiltros.
-              className="btn-secondary"
-            >
-              Limpiar Filtros
-            </button>
-          </div>
-        </div>
+          <button className="btn-calcular" type="submit">
+            Calcular
+          </button>
+        </form>
       </section>
 
-      {/* RESULTADOS */}
-      <div className="credit-list">
-        {resultados.length > 0 ? (//Si hay resultados se muestra el bloque, si no, el mensaje
-          <>
-            <p className="result-count"> {/*Muestra cuántos resultados hay. */}
-              Mostrando {resultados.length} resultado {/*Para el número de resultados */}
-              {resultados.length !== 1 && "s"}
-            </p>
+      {/* RESULTADO */}
+      {resultado && (
+        <div className="resultado-box">
+          <h3>Resultado de la simulación</h3>
 
-            <div className="credits-grid">
-              {resultados.map((credit) => ( //Recorre el arreglo resultados
-                <CreditCard
-                  key={credit.id}
-                  nombre={credit.nombre}
-                  descripcion={credit.descripcion}
-                  tasa={credit.tasa}
-                  monto={credit.monto}
-                  plazo={credit.plazo}
-                  imagen={credit.imagen}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <p className="no-results">No hay créditos disponibles</p>
-        )}
-      </div>
+          <p><strong>Tasa anual:</strong> {resultado.tasa}%</p>
+          <p><strong>Cuota mensual:</strong> ${Number(resultado.cuota).toLocaleString()}</p>
+          <p><strong>Total a pagar:</strong> ${Number(resultado.totalPagar).toLocaleString()}</p>
+          <p><strong>Intereses totales:</strong> ${Number(resultado.interesesTotales).toLocaleString()}</p>
+        </div>
+      )}
 
       <Footer />
     </div>
